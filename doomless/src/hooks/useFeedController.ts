@@ -40,15 +40,16 @@ const inferDifficulty = (text: string): FactCard['difficulty'] => {
   return 'hard';
 };
 
-const mapFactToFactCard = (fact: Fact): FactCard => ({
+const mapFactToFactCard = (fact: Fact, categoryLabel: string): FactCard => ({
   id: `fact-${fact.id}`,
   type: 'fact',
   text: fact.content,
   category: fact.topic as CategoryId,
+  categoryLabel,
   difficulty: inferDifficulty(fact.content),
 });
 
-const mapFactToQuizCard = (fact: Fact): QuizCard | null => {
+const mapFactToQuizCard = (fact: Fact, categoryLabel: string): QuizCard | null => {
   if (!fact.quiz_data) {
     return null;
   }
@@ -59,6 +60,7 @@ const mapFactToQuizCard = (fact: Fact): QuizCard | null => {
     options: fact.quiz_data.options,
     correctIndex: fact.quiz_data.correct_answer,
     category: fact.topic as CategoryId,
+    categoryLabel,
     relatedFactId: `fact-${fact.id}`,
   };
 };
@@ -117,6 +119,13 @@ export const useFeedController = (): UseFeedControllerReturn => {
     () => categories.filter((category) => category.enabled).map((category) => category.id),
     [categories],
   );
+  const categoryLabelById = useMemo(() => {
+    const map: Record<CategoryId, string> = {};
+    categories.forEach((category) => {
+      map[category.id] = category.name;
+    });
+    return map;
+  }, [categories]);
   const enabledCategorySignature = useMemo(
     () => enabledCategoryList.join('|'),
     [enabledCategoryList],
@@ -239,10 +248,20 @@ export const useFeedController = (): UseFeedControllerReturn => {
 
         const factCards = facts
           .filter((fact) => !fact.is_quiz)
-          .map(mapFactToFactCard);
+          .map((fact) =>
+            mapFactToFactCard(
+              fact,
+              categoryLabelById[fact.topic as CategoryId] ?? fact.topic,
+            ),
+          );
         const quizCards = facts
           .filter((fact) => fact.is_quiz && fact.quiz_data)
-          .map(mapFactToQuizCard)
+          .map((fact) =>
+            mapFactToQuizCard(
+              fact,
+              categoryLabelById[fact.topic as CategoryId] ?? fact.topic,
+            ),
+          )
           .filter((card): card is QuizCard => card != null);
 
         setFactDeck(factCards);
@@ -269,7 +288,7 @@ export const useFeedController = (): UseFeedControllerReturn => {
     return () => {
       cancelled = true;
     };
-  }, [contentRevision, enabledCategorySignature]);
+  }, [contentRevision, enabledCategorySignature, categoryLabelById]);
 
   const likeCurrent = useCallback(() => {
     if (!currentCard || currentCard.type !== 'fact') {

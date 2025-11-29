@@ -21,6 +21,7 @@ export const FactCard: React.FC<FactCardProps> = ({
   onCollapse,
 }) => {
   const lastTapRef = useRef<number | null>(null);
+  const displayCategory = card.categoryLabel ?? card.category;
 
   useEffect(() => {
     if (!isExpanded) {
@@ -55,7 +56,7 @@ export const FactCard: React.FC<FactCardProps> = ({
     >
       <View style={[styles.container, isExpanded && styles.containerExpanded]}>
         <View style={styles.headerRow}>
-          <Text style={styles.category}>{card.category.toUpperCase()}</Text>
+          <Text style={styles.category}>{displayCategory}</Text>
           <Text style={styles.difficulty}>{card.difficulty.toUpperCase()}</Text>
         </View>
 
@@ -70,8 +71,8 @@ export const FactCard: React.FC<FactCardProps> = ({
             <View style={styles.callout}>
               <Text style={styles.calloutTitle}>Why it sticks</Text>
               <Text style={styles.calloutBody}>
-                Swiping right builds a smarter feed around {card.category} curiosities. Swiping left
-                or up tells the brain coach to remix your next discoveries.
+                Swiping right builds a smarter feed around {displayCategory} curiosities. Swiping left
+                tells the brain coach to remix your next discoveries.
               </Text>
             </View>
           </ScrollView>
@@ -85,7 +86,7 @@ export const FactCard: React.FC<FactCardProps> = ({
 
         <View style={styles.footerRow}>
           <Text style={styles.footerHint}>
-            {isExpanded ? 'Double tap to collapse' : 'Tap to expand • Swipe to react'}
+            {isExpanded ? 'Double tap to collapse' : 'Tap to expand • Swipe left/right to react'}
           </Text>
         </View>
       </View>

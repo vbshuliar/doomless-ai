@@ -98,11 +98,13 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     color: '#e2e8f0',
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
     color: '#94a3b8',
     lineHeight: 24,
+    textAlign: 'center',
   },
   section: {
     backgroundColor: '#fdfdfd',
@@ -138,6 +140,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    flex: 1,
+    minWidth: 0,
   },
   categoryIcon: {
     fontSize: 16,
@@ -146,6 +150,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#2563eb',
+    flexShrink: 1,
+    flexWrap: 'wrap',
   },
   categoryScore: {
     fontSize: 16,

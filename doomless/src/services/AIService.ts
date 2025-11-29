@@ -36,6 +36,17 @@ type CompletionMessage = {
   images?: string[];
 };
 
+function stripThinkingBlocks(raw: string): string {
+  if (!raw) {
+    return raw;
+  }
+
+  let cleaned = raw.replace(/<think>[\s\S]*?<\/think>/gi, '');
+  cleaned = cleaned.replace(/<think>|<\/think>/gi, '');
+
+  return cleaned.trim();
+}
+
 // Cactus React Native bridge imports (gracefully degraded when module is missing)
 let CactusLMClass: any = null;
 try {
@@ -152,7 +163,7 @@ class AIService {
       throw new Error(message);
     }
 
-    return result.response;
+    return stripThinkingBlocks(result.response);
   }
 
   private fallbackParseTextToFacts(text: string, topic: string): Fact[] {
@@ -341,14 +352,33 @@ class AIService {
           chunkIndex,
           totalChunks: chunks.length,
         });
-        const prompt = `Extract concise, interesting facts from the following text. Each fact should be exactly 200 characters or less. Format each fact on a new line. Only extract factual information, not opinions.
+        const prompt = `You extract concise, standalone facts from text.
+
+Rules:
+- Only output the final facts.
+- Each fact MUST be on its own line.
+- Each fact MUST be 200 characters or less.
+- Do NOT include any <think> tags or internal thoughts.
+- Do NOT explain your reasoning.
+- Do NOT add introductions or conclusions.
+- Do NOT number the facts (no "1.", "2.", "-", etc.).
+- Just output one fact per line.
 
 Text:
 ${chunk}
 
-Facts:`;
+Facts:`.trim();
 
-        const messages: CompletionMessage[] = [{ role: 'user', content: prompt }];
+        const messages: CompletionMessage[] = [
+          {
+            role: 'system',
+            content:
+              'You are an assistant that extracts short, standalone facts from text. ' +
+              'Respond ONLY with the final facts, one per line. Do NOT include <think> tags, ' +
+              'internal thoughts, or explanations. No numbering, no extra commentary.',
+          },
+          { role: 'user', content: prompt },
+        ];
 
         let response: string;
         try {
@@ -362,11 +392,14 @@ Facts:`;
           continue;
         }
         
+        const cleanedResponse = stripThinkingBlocks(response);
+
         // Parse facts from response (split by newlines)
-        const factLines = response
+        const factLines = cleanedResponse
           .split('\n')
-          .map(line => line.trim())
-          .filter(line => line.length > 0 && line.length <= 200);
+          .map((line) => line.trim())
+          .map((line) => line.replace(/^[\d]+\s*[\.\)\-:]\s*/, '').replace(/^[-•]\s*/, '').trim())
+          .filter((line) => line.length > 0 && line.length <= 200);
 
         // Create Fact objects
         for (const content of factLines) {
@@ -462,7 +495,15 @@ Analyze the pattern and provide a JSON response with:
 
 Only respond with valid JSON.`;
 
-      const messages: CompletionMessage[] = [{ role: 'user', content: prompt }];
+      const messages: CompletionMessage[] = [
+        {
+          role: 'system',
+          content:
+            'You analyze interaction summaries and return JSON. ' +
+            'Respond ONLY with the final JSON payload. Do NOT include <think> tags, reasoning, or commentary.',
+        },
+        { role: 'user', content: prompt },
+      ];
 
       let response: string;
       try {
@@ -517,7 +558,16 @@ Generate 3 related, interesting facts about ${topic}. Each fact should be exactl
 
 Related facts:`;
 
-      const messages: CompletionMessage[] = [{ role: 'user', content: prompt }];
+      const messages: CompletionMessage[] = [
+        {
+          role: 'system',
+          content:
+            'You generate related standalone facts. ' +
+            'Respond ONLY with the final facts, each on its own line. ' +
+            'Do NOT include <think> tags, internal reasoning, or commentary.',
+        },
+        { role: 'user', content: prompt },
+      ];
 
       let response: string;
       try {
@@ -632,7 +682,16 @@ Rules:
 - Set correct_answer to the zero-based index of the correct option.
 - Reply with JSON only.`;
 
-    const messages: CompletionMessage[] = [{ role: 'user', content: prompt }];
+    const messages: CompletionMessage[] = [
+      {
+        role: 'system',
+        content:
+          'You generate multiple-choice quiz questions. ' +
+          'Respond ONLY with the final JSON array described by the user. ' +
+          'Do NOT include <think> tags, explanations, or commentary.',
+      },
+      { role: 'user', content: prompt },
+    ];
 
     try {
       const response = await this.runCompletion(messages, {

@@ -18,10 +18,11 @@ export type QuizCardProps = {
 };
 
 export const QuizCard: React.FC<QuizCardProps> = ({ card, onSelect, feedback, onSkip }) => {
+  const displayCategory = card.categoryLabel ?? card.category;
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
-        <Text style={styles.category}>{card.category.toUpperCase()}</Text>
+        <Text style={styles.category}>{displayCategory}</Text>
         <View style={styles.headerBadgeRow}>
           <Text style={styles.quizLabel}>QUIZ</Text>
           {onSkip && (

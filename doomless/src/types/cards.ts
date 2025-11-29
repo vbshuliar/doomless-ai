@@ -8,6 +8,7 @@ export type FactCard = {
   type: 'fact';
   text: string;
   category: CategoryId;
+  categoryLabel?: string;
   difficulty: FactDifficulty;
 };
 
@@ -18,6 +19,7 @@ export type QuizCard = {
   options: string[];
   correctIndex: number;
   category: CategoryId;
+  categoryLabel?: string;
   relatedFactId?: string;
 };
 

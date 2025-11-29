@@ -21,36 +21,30 @@ import { useCategories } from '../hooks/useBrainProfile';
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 // Thresholds scale with the display so swipe effort stays consistent across devices.
 const H_THRESHOLD = SCREEN_WIDTH * 0.26;
-const V_THRESHOLD = SCREEN_HEIGHT * 0.21;
 const CARD_HEIGHT = SCREEN_WIDTH * 1.08;
 const EXPANDED_CARD_WIDTH = SCREEN_WIDTH - 24;
 const EXPANDED_CARD_HEIGHT = Math.max(SCREEN_HEIGHT - 190, CARD_HEIGHT + 60);
 const VELOCITY_TRIGGER = 1.35;
 
-type SwipeDirection = 'left' | 'right' | 'up';
+type SwipeDirection = 'left' | 'right';
 
 const resolveSwipeDirection = (
   dx: number,
   dy: number,
   vx: number,
-  vy: number,
+  _vy: number,
 ): SwipeDirection | null => {
   const absDx = Math.abs(dx);
   const absDy = Math.abs(dy);
 
   // Horizontal swipes take priority when the drag exceeds the horizontal threshold.
-  if (absDx > absDy && absDx > H_THRESHOLD) {
+  if (absDx > absDy * 0.6 && absDx > H_THRESHOLD) {
     return dx > 0 ? 'right' : 'left';
   }
 
   // Allow quick horizontal flicks even if distance is small.
   if (absDx > absDy && Math.abs(vx) > VELOCITY_TRIGGER * 0.9) {
     return vx > 0 ? 'right' : 'left';
-  }
-
-  // Upwards skip requires a stronger vertical intent so it does not collide with horizontal moves.
-  if ((dy < -V_THRESHOLD && absDy > absDx * 0.7) || vy < -VELOCITY_TRIGGER) {
-    return 'up';
   }
 
   return null;
@@ -63,7 +57,6 @@ export const FeedScreen: React.FC = () => {
     quizFeedback,
     likeCurrent,
     dislikeCurrent,
-    skipCurrent,
     answerQuiz,
     skipQuiz,
   } = useFeedController();
@@ -111,16 +104,6 @@ export const FeedScreen: React.FC = () => {
     [translateX],
   );
 
-  const topHintOpacity = useMemo(
-    () =>
-      translateY.interpolate({
-        inputRange: [-V_THRESHOLD, 0],
-        outputRange: [0.75, 0],
-        extrapolate: 'clamp',
-      }),
-    [translateY],
-  );
-
   const overlayOpacity = useMemo(
     () =>
       scale.interpolate({
@@ -163,7 +146,7 @@ export const FeedScreen: React.FC = () => {
           : direction === 'left'
           ? -SCREEN_WIDTH * 1.2
           : dx;
-      const targetY = direction === 'up' ? -SCREEN_HEIGHT * 1.2 : dy;
+      const targetY = dy;
 
       Animated.parallel([
         Animated.timing(translateX, {
@@ -187,14 +170,12 @@ export const FeedScreen: React.FC = () => {
 
         if (direction === 'right') {
           likeCurrent();
-        } else if (direction === 'left') {
-          dislikeCurrent();
         } else {
-          skipCurrent();
+          dislikeCurrent();
         }
       });
     },
-    [currentCard, dislikeCurrent, likeCurrent, resetCardPosition, scale, skipCurrent, translateX, translateY],
+    [currentCard, dislikeCurrent, likeCurrent, resetCardPosition, scale, translateX, translateY],
   );
 
   const canSwipe = currentCard?.type === 'fact' && !isExpanded && !isHydrating;
@@ -323,7 +304,7 @@ export const FeedScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
-        <Text style={styles.heroTitle}>CurioSwipe</Text>
+        <Text style={styles.heroTitle}>DoomLess</Text>
         <Text style={styles.subtitle}>Replace doomscrolling with delightful micro-knowledge.</Text>
 
         <View style={styles.cardStage}>
@@ -341,11 +322,6 @@ export const FeedScreen: React.FC = () => {
                 pointerEvents="none"
                 style={[styles.edgeHint, styles.edgeHintRight, { opacity: rightHintOpacity }]}
               />
-              <Animated.View
-                pointerEvents="none"
-                style={[styles.edgeHint, styles.edgeHintTop, { opacity: topHintOpacity }]}
-              />
-
               <Animated.View
                 style={[styles.cardContainer, compactCardStyle]}
                 {...(panHandlers ?? {})}
@@ -441,13 +417,6 @@ const styles = StyleSheet.create({
     right: 16,
     width: 86,
     backgroundColor: 'rgba(34, 197, 94, 0.2)',
-  },
-  edgeHintTop: {
-    top: 16,
-    left: 32,
-    right: 32,
-    height: 110,
-    backgroundColor: 'rgba(250, 204, 21, 0.18)',
   },
   placeholder: {
     flex: 1,
