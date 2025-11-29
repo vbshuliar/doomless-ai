@@ -1,8 +1,8 @@
 // Shapes for the local personalization profile stored on-device.
-import type { Category } from './cards';
+import type { CategoryId } from './categories';
 
 export type BrainProfile = {
-  categoryScores: Record<Category, number>;
+  categoryScores: Record<CategoryId, number>;
   factsSeen: number;
   likes: number;
   dislikes: number;
@@ -11,18 +11,21 @@ export type BrainProfile = {
   quizzesCorrect: number;
 };
 
-export const initialBrainProfile: BrainProfile = {
-  categoryScores: {
-    science: 0,
-    history: 0,
-    psychology: 0,
-    literature: 0,
-    random: 0,
-  },
-  factsSeen: 0,
-  likes: 0,
-  dislikes: 0,
-  skips: 0,
-  quizzesAnswered: 0,
-  quizzesCorrect: 0,
+export const buildInitialBrainProfile = (
+  categoryIds: CategoryId[],
+): BrainProfile => {
+  const categoryScores: Record<CategoryId, number> = {};
+  categoryIds.forEach((id) => {
+    categoryScores[id] = 0;
+  });
+
+  return {
+    categoryScores,
+    factsSeen: 0,
+    likes: 0,
+    dislikes: 0,
+    skips: 0,
+    quizzesAnswered: 0,
+    quizzesCorrect: 0,
+  };
 };

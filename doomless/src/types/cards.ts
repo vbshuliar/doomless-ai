@@ -1,10 +1,5 @@
 // Core content types for CurioSwipe cards and categories.
-export type Category =
-  | 'science'
-  | 'history'
-  | 'psychology'
-  | 'literature'
-  | 'random';
+import type { CategoryId } from './categories';
 
 export type FactDifficulty = 'easy' | 'medium' | 'hard';
 
@@ -12,7 +7,7 @@ export type FactCard = {
   id: string;
   type: 'fact';
   text: string;
-  category: Category;
+  category: CategoryId;
   difficulty: FactDifficulty;
 };
 
@@ -22,7 +17,7 @@ export type QuizCard = {
   question: string;
   options: string[];
   correctIndex: number;
-  category: Category;
+  category: CategoryId;
   relatedFactId?: string;
 };
 

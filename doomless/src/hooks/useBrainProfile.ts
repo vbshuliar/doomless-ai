@@ -10,6 +10,9 @@ export const useBrainProfile = () =>
 export const useBrainHydration = () =>
   useBrainStore((state: BrainState) => state.hasHydrated);
 
+export const useCategories = () =>
+  useBrainStore((state: BrainState) => state.categories);
+
 export const useBrainStats = () => {
   const profile = useBrainProfile();
   return useMemo(() => {

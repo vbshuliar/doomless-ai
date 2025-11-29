@@ -1,11 +1,11 @@
 // Placeholder client for the future Cactus SDK integration.
 // These types and functions sketch the contract we expect once on-device models are wired up.
-import type { Category } from '../types/cards';
+import type { CategoryId } from '../types/categories';
 import type { BrainProfile } from '../types/brain';
 
 export type AIRewriteRequest = {
   originalText: string;
-  category: Category;
+  category: CategoryId;
   difficulty: 'easy' | 'medium' | 'hard';
   userProfile: BrainProfile;
 };
@@ -16,7 +16,7 @@ export type AIRewriteResponse = {
 
 export type AIQuizGenerationRequest = {
   sourceText: string;
-  category: Category;
+  category: CategoryId;
 };
 
 export type AIQuizGenerationResponse = {

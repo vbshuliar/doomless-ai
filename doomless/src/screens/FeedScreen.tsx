@@ -16,6 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { FactCard } from '../components/FactCard';
 import { QuizCard } from '../components/QuizCard';
 import { useFeedController } from '../hooks/useFeedController';
+import { useCategories } from '../hooks/useBrainProfile';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 // Thresholds scale with the display so swipe effort stays consistent across devices.
@@ -66,6 +67,11 @@ export const FeedScreen: React.FC = () => {
     answerQuiz,
     skipQuiz,
   } = useFeedController();
+  const categories = useCategories();
+  const enabledCategoryCount = useMemo(
+    () => categories.filter((category) => category.enabled).length,
+    [categories],
+  );
 
   const translateX = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(0)).current;
@@ -298,9 +304,13 @@ export const FeedScreen: React.FC = () => {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.placeholder}>
-          <Text style={styles.placeholderTitle}>All caught up!</Text>
+          <Text style={styles.placeholderTitle}>
+            {enabledCategoryCount === 0 ? 'Choose sources to begin' : 'All caught up!'}
+          </Text>
           <Text style={styles.placeholderText}>
-            You have explored all bundled cards. New content will arrive with the next update.
+            {enabledCategoryCount === 0
+              ? 'Enable up to five categories in Settings to start the curiosity stream.'
+              : 'You have explored all bundled cards. New content will arrive with the next update.'}
           </Text>
         </View>
       </SafeAreaView>

@@ -4,10 +4,8 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ProgressBar } from '../components/ProgressBar';
-import { useBrainStats } from '../hooks/useBrainProfile';
-import type { Category } from '../types/cards';
-
-const categories: Category[] = ['science', 'history', 'psychology', 'literature', 'random'];
+import { useBrainStats, useCategories } from '../hooks/useBrainProfile';
+import { CategoryKind } from '../types/categories';
 const SCORE_WINDOW = 10; // used to normalize category scores into a 0..1 range.
 
 const normalizeScore = (score: number) => {
@@ -17,6 +15,12 @@ const normalizeScore = (score: number) => {
 
 export const BrainScreen: React.FC = () => {
   const stats = useBrainStats();
+  const categories = useCategories();
+
+  const enabledCategories = useMemo(
+    () => categories.filter((category) => category.enabled),
+    [categories],
+  );
 
   const totals = useMemo(
     () => [
@@ -40,18 +44,29 @@ export const BrainScreen: React.FC = () => {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Category Focus</Text>
-          {categories.map((category) => {
-            const score = stats.categoryScores[category] ?? 0;
-            return (
-              <View key={category} style={styles.categoryRow}>
-                <View style={styles.categoryHeader}>
-                  <Text style={styles.categoryLabel}>{category.toUpperCase()}</Text>
-                  <Text style={styles.categoryScore}>{score}</Text>
+          {enabledCategories.length === 0 ? (
+            <Text style={styles.emptyState}>
+              Enable up to five categories in Settings to see progress build over time.
+            </Text>
+          ) : (
+            enabledCategories.map((category) => {
+              const score = stats.categoryScores[category.id] ?? 0;
+              return (
+                <View key={category.id} style={styles.categoryRow}>
+                  <View style={styles.categoryHeader}>
+                    <View style={styles.categoryHeaderLeft}>
+                      <Text style={styles.categoryIcon}>
+                        {category.kind === CategoryKind.Default ? '✨' : '📄'}
+                      </Text>
+                      <Text style={styles.categoryLabel}>{category.name}</Text>
+                    </View>
+                    <Text style={styles.categoryScore}>{score}</Text>
+                  </View>
+                  <ProgressBar value={normalizeScore(score)} />
                 </View>
-                <ProgressBar value={normalizeScore(score)} />
-              </View>
-            );
-          })}
+              );
+            })
+          )}
         </View>
 
         <View style={styles.section}>
@@ -106,6 +121,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#0f172a',
   },
+  emptyState: {
+    fontSize: 16,
+    color: '#64748b',
+    lineHeight: 22,
+  },
   categoryRow: {
     gap: 8,
   },
@@ -114,11 +134,18 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  categoryHeaderLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  categoryIcon: {
+    fontSize: 16,
+  },
   categoryLabel: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: '600',
     color: '#2563eb',
-    letterSpacing: 1.1,
   },
   categoryScore: {
     fontSize: 16,
