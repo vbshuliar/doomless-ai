@@ -14,14 +14,27 @@ export type QuizCardProps = {
   card: QuizCardType;
   onSelect: (index: number) => void;
   feedback: QuizFeedback | null;
+  onSkip?: () => void;
 };
 
-export const QuizCard: React.FC<QuizCardProps> = ({ card, onSelect, feedback }) => {
+export const QuizCard: React.FC<QuizCardProps> = ({ card, onSelect, feedback, onSkip }) => {
   return (
     <View style={styles.container}>
       <View style={styles.headerRow}>
         <Text style={styles.category}>{card.category.toUpperCase()}</Text>
-        <Text style={styles.quizLabel}>QUIZ</Text>
+        <View style={styles.headerBadgeRow}>
+          <Text style={styles.quizLabel}>QUIZ</Text>
+          {onSkip && (
+            <TouchableOpacity
+              accessibilityRole="button"
+              onPress={onSkip}
+              style={styles.skipButton}
+              hitSlop={12}
+            >
+              <Text style={styles.skipLabel}>Skip</Text>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
       <Text style={styles.question}>{card.question}</Text>
       <View style={styles.optionsWrapper}>
@@ -67,19 +80,30 @@ export const QuizCard: React.FC<QuizCardProps> = ({ card, onSelect, feedback }) 
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
+    flex: 1,
+    backgroundColor: '#fdfdfd',
+    borderRadius: 18,
     padding: 24,
+    borderWidth: 1.5,
+    borderColor: '#cbd5f5',
     shadowColor: '#000',
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 4,
+    shadowOpacity: 0.08,
+    shadowRadius: 18,
+    elevation: 6,
     marginHorizontal: 16,
+    gap: 16,
+    justifyContent: 'space-between',
   },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  headerBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   category: {
     fontWeight: '600',
@@ -91,11 +115,25 @@ const styles = StyleSheet.create({
     color: '#6c6f93',
     letterSpacing: 1.2,
   },
+  skipButton: {
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: '#cbd5f5',
+    backgroundColor: '#eef2ff',
+  },
+  skipLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#475569',
+    letterSpacing: 0.4,
+  },
   question: {
     fontSize: 20,
     lineHeight: 28,
     color: '#1f1f1f',
-    marginBottom: 20,
+    marginBottom: 12,
   },
   optionsWrapper: {
     gap: 12,
@@ -127,7 +165,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   feedbackLabel: {
-    marginTop: 16,
+    marginTop: 4,
     textAlign: 'center',
     color: '#4b5563',
     fontSize: 15,

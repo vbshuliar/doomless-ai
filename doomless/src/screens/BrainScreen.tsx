@@ -71,36 +71,40 @@ export const BrainScreen: React.FC = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#f1f5f9',
+    backgroundColor: '#0f172a',
   },
   content: {
-    padding: 24,
-    gap: 24,
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    paddingBottom: 64,
+    gap: 28,
   },
   title: {
     fontSize: 28,
     fontWeight: '700',
-    color: '#111827',
+    color: '#e2e8f0',
   },
   subtitle: {
     fontSize: 16,
-    color: '#4b5563',
-    lineHeight: 22,
+    color: '#94a3b8',
+    lineHeight: 24,
   },
   section: {
-    backgroundColor: '#ffffff',
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: '#000000',
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 3,
-    gap: 16,
+    backgroundColor: '#fdfdfd',
+    borderRadius: 24,
+    padding: 24,
+    borderWidth: 1.5,
+    borderColor: '#cbd5f5',
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 18,
+    elevation: 6,
+    gap: 18,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1f2937',
+    color: '#0f172a',
   },
   categoryRow: {
     gap: 8,
@@ -119,7 +123,7 @@ const styles = StyleSheet.create({
   categoryScore: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
+    color: '#0f172a',
   },
   statRow: {
     flexDirection: 'row',
@@ -127,11 +131,11 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 16,
-    color: '#4b5563',
+    color: '#475569',
   },
   statValue: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#111827',
+    color: '#0f172a',
   },
 });

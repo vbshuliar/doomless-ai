@@ -18,6 +18,7 @@ type UseFeedControllerReturn = {
   skipCurrent: () => void;
   answerQuiz: (optionIndex: number) => void;
   resetFeedback: () => void;
+  skipQuiz: () => void;
 };
 
 type WeightedItem<T extends { category: FactCard['category'] }> = {
@@ -202,6 +203,18 @@ export const useFeedController = (): UseFeedControllerReturn => {
     setQuizFeedback(null);
   }, []);
 
+  const skipQuiz = useCallback(() => {
+    if (!currentCard || currentCard.type !== 'quiz') {
+      return;
+    }
+    if (feedbackTimeout.current) {
+      clearTimeout(feedbackTimeout.current);
+      feedbackTimeout.current = null;
+    }
+    setQuizFeedback(null);
+    advanceToNextCard();
+  }, [advanceToNextCard, currentCard]);
+
   return {
     currentCard,
     isHydrating: !hasHydrated,
@@ -211,5 +224,6 @@ export const useFeedController = (): UseFeedControllerReturn => {
     skipCurrent,
     answerQuiz,
     resetFeedback,
+    skipQuiz,
   };
 };
